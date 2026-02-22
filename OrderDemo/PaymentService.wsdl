@@ -1,0 +1,40 @@
+<definitions targetNamespace="http://example.com/payment"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/payment"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+
+    <message name="PaymentRequestMessage">
+        <part name="creditCard" type="xsd:string"/>
+    </message>
+    <message name="PaymentResponseMessage">
+        <part name="status" type="xsd:string"/> 
+    </message>
+
+    <portType name="PaymentPT">
+        <operation name="chargeCard">
+            <input message="tns:PaymentRequestMessage"/>
+            <output message="tns:PaymentResponseMessage"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="PaymentPLT">
+        <plnk:role name="paymentService" portType="tns:PaymentPT"/>
+    </plnk:partnerLinkType>
+
+    <binding name="PaymentBinding" type="tns:PaymentPT">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="chargeCard">
+            <soap:operation soapAction="http://example.com/payment/chargeCard"/>
+            <input><soap:body use="literal" namespace="http://example.com/payment"/></input>
+            <output><soap:body use="literal" namespace="http://example.com/payment"/></output>
+        </operation>
+    </binding>
+
+    <service name="PaymentService">
+        <port name="PaymentPort" binding="tns:PaymentBinding">
+            <soap:address location="http://localhost:8088/mockPaymentService"/>
+        </port>
+    </service>
+</definitions>

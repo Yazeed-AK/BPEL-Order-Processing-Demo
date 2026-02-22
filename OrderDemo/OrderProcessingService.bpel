@@ -1,0 +1,89 @@
+<process name="OrderProcessingService"
+         targetNamespace="http://example.com/orderprocessing"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://example.com/orderprocessing"
+         xmlns:inv="http://example.com/inventory"
+         xmlns:pay="http://example.com/payment">
+
+    <import location="OrderProcessingService.wsdl" namespace="http://example.com/orderprocessing" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="InventoryService.wsdl" namespace="http://example.com/inventory" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="PaymentService.wsdl" namespace="http://example.com/payment" importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="client" partnerLinkType="tns:OrderPLT" myRole="orderService"/>
+        <partnerLink name="inventory" partnerLinkType="inv:InventoryPLT" partnerRole="inventoryService"/>
+        <partnerLink name="payment" partnerLinkType="pay:PaymentPLT" partnerRole="paymentService"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="orderRequest" messageType="tns:OrderRequestMessage"/>
+        <variable name="inventoryRequest" messageType="inv:InventoryRequestMessage"/>
+        <variable name="inventoryResponse" messageType="inv:InventoryResponseMessage"/>
+        <variable name="paymentRequest" messageType="pay:PaymentRequestMessage"/>
+        <variable name="paymentResponse" messageType="pay:PaymentResponseMessage"/>
+        <variable name="orderReply" messageType="tns:OrderReplyMessage"/>
+    </variables>
+
+    <sequence name="OrderProcessingSequence">
+        
+        <receive name="ReceiveOrder" partnerLink="client" portType="tns:OrderPT" 
+                 operation="processOrder" variable="orderRequest" createInstance="yes"/>
+
+        <assign name="PrepareInventoryRequest">
+            <copy>
+                <from variable="orderRequest" part="productId"/>
+                <to variable="inventoryRequest" part="productId"/>
+            </copy>
+        </assign>
+
+        <invoke name="CheckInventory" partnerLink="inventory" portType="inv:InventoryPT" 
+                operation="checkStock" inputVariable="inventoryRequest" outputVariable="inventoryResponse"/>
+
+        <if name="CheckStockCondition">
+            <condition>$inventoryResponse.inStock = 'true'</condition>
+            <sequence>
+                
+                <assign name="PreparePaymentRequest">
+                    <copy>
+                        <from variable="orderRequest" part="creditCard"/>
+                        <to variable="paymentRequest" part="creditCard"/>
+                    </copy>
+                </assign>
+
+                <invoke name="ProcessPayment" partnerLink="payment" portType="pay:PaymentPT" 
+                        operation="chargeCard" inputVariable="paymentRequest" outputVariable="paymentResponse"/>
+                
+                <if name="CheckPaymentCondition">
+                    <condition>$paymentResponse.status = 'success'</condition>
+                    <assign name="AssignSuccess">
+                        <copy>
+                            <from><literal>Order Confirmed</literal></from>
+                            <to variable="orderReply" part="status"/>
+                        </copy>
+                    </assign>
+                    <else>
+                        <assign name="AssignPaymentFailure">
+                            <copy>
+                                <from><literal>Payment Failed</literal></from>
+                                <to variable="orderReply" part="status"/>
+                            </copy>
+                        </assign>
+                    </else>
+                </if>
+            </sequence>
+            
+            <else>
+                <assign name="AssignOutOfStock">
+                    <copy>
+                        <from><literal>Out of Stock</literal></from>
+                        <to variable="orderReply" part="status"/>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+        <reply name="SendOrderReply" partnerLink="client" portType="tns:OrderPT" 
+               operation="processOrder" variable="orderReply"/>
+               
+    </sequence>
+</process>

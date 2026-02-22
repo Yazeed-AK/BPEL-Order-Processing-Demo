@@ -1,0 +1,42 @@
+<definitions targetNamespace="http://example.com/orderprocessing"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/orderprocessing"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+
+    <message name="OrderRequestMessage">
+        <part name="productId" type="xsd:string"/>
+        <part name="quantity" type="xsd:int"/>
+        <part name="creditCard" type="xsd:string"/>
+    </message>
+    <message name="OrderReplyMessage">
+        <part name="status" type="xsd:string"/>
+    </message>
+
+    <portType name="OrderPT">
+        <operation name="processOrder">
+            <input message="tns:OrderRequestMessage"/>
+            <output message="tns:OrderReplyMessage"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="OrderPLT">
+        <plnk:role name="orderService" portType="tns:OrderPT"/>
+    </plnk:partnerLinkType>
+
+    <binding name="OrderBinding" type="tns:OrderPT">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="processOrder">
+            <soap:operation soapAction="http://example.com/orderprocessing/processOrder"/>
+            <input><soap:body use="literal" namespace="http://example.com/orderprocessing"/></input>
+            <output><soap:body use="literal" namespace="http://example.com/orderprocessing"/></output>
+        </operation>
+    </binding>
+
+    <service name="OrderService">
+        <port name="OrderPort" binding="tns:OrderBinding">
+            <soap:address location="http://localhost:8080/ode/processes/OrderService"/>
+        </port>
+    </service>
+</definitions>
