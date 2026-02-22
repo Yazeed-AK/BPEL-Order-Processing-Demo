@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="e8803232-5a9b-49fb-862c-cfbc07206424" activeEnvironment="Default" name="OrderProcessingService" resourceRoot="" soapui-version="5.9.1" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="dcb12429-9d29-423a-b46d-bd2c63d63871" wsaVersion="NONE" name="OrderBinding" type="wsdl" bindingName="{http://example.com/orderprocessing}OrderBinding" soapVersion="1_1" anonymous="optional" definition="file:/C:/Users/yazee/Documents/KSU/SWE486/BPEL%20Project/OrderDemo/OrderProcessingService.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="file:\C:\Users\yazee\Documents\KSU\SWE486\BPEL%20Project\OrderDemo\OrderProcessingService.wsdl"><con:part><con:url>file:\C:\Users\yazee\Documents\KSU\SWE486\BPEL%20Project\OrderDemo\OrderProcessingService.wsdl</con:url><con:content><![CDATA[<definitions targetNamespace="http://example.com/orderprocessing" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://example.com/orderprocessing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/">
+  <message name="OrderRequestMessage">
+    <part name="productId" type="xsd:string"/>
+    <part name="quantity" type="xsd:int"/>
+    <part name="creditCard" type="xsd:string"/>
+  </message>
+  <message name="OrderReplyMessage">
+    <part name="status" type="xsd:string"/>
+  </message>
+  <portType name="OrderPT">
+    <operation name="processOrder">
+      <input message="tns:OrderRequestMessage"/>
+      <output message="tns:OrderReplyMessage"/>
+    </operation>
+  </portType>
+  <plnk:partnerLinkType name="OrderPLT">
+    <plnk:role name="orderService">
+      <plnk:portType name="tns:OrderPT"/>
+    </plnk:role>
+  </plnk:partnerLinkType>
+  <binding name="OrderBinding" type="tns:OrderPT">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="processOrder">
+      <soap:operation soapAction="http://example.com/orderprocessing/processOrder"/>
+      <input>
+        <soap:body use="literal" namespace="http://example.com/orderprocessing"/>
+      </input>
+      <output>
+        <soap:body use="literal" namespace="http://example.com/orderprocessing"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="OrderService">
+    <port name="OrderPort" binding="tns:OrderBinding">
+      <soap:address location="http://localhost:8080/ode/processes/OrderProcessingService"/>
+    </port>
+  </service>
+</definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/ode/processes/OrderProcessingService</con:endpoint></con:endpoints><con:operation id="c9b2cfe2-1f7e-4175-88a9-d404bac30331" isOneWay="false" action="http://example.com/orderprocessing/processOrder" name="processOrder" bindingOperationName="processOrder" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="959e4a57-9b17-4d25-a94f-b68c7b9050b8" name="Request 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/ode/processes/OrderService</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ord="http://example.com/orderprocessing">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <ord:processOrder>\r
+         <productId>12345</productId>\r
+         <quantity>1</quantity>\r
+         <creditCard>9999-8888-7777</creditCard>\r
+      </ord:processOrder>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://example.com/orderprocessing/processOrder"/><con:wsrmConfig version="1.2"/></con:call></con:operation></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>
